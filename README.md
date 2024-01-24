@@ -12,11 +12,12 @@
 * 각 요구사항을 구현하는 것이 중요한 것이 아니라 구현 과정을 통해 학습한 내용을 인식하는 것이 배움에 중요하다.
 
 ### 요구사항 1 - http://localhost:8080/index.html로 접속시 응답
--[x] Request Header가 어떻게 생겼는지 파악하기 위해 모두 출력해본다.
--[x] Request Header의 첫번째 줄에서 HTTP method와 요청 url을 구분하여 저장해야 한다.
--[x] `GET /index.html`  요청을 처리할 메서드를 만든다.
--[ ] css가 적용되지 않는 문제 해결하기
-- [요구사항 1 학습 내용](/Requirement_1)
+- [x] Request Header가 어떻게 생겼는지 파악하기 위해 모두 출력해본다.
+- [x] Request Header의 첫번째 줄에서 HTTP method와 요청 url을 구분하여 저장해야 한다.
+- [x] `GET /index.html`  요청을 처리할 메서드를 만든다.
+- [ ] css가 적용되지 않는 문제 해결하기
+
+[요구사항 1 학습 내용](/Requirement_1)
 
 ### 요구사항 2 - get 방식으로 회원가입
 *

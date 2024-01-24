@@ -1,10 +1,11 @@
 package webserver;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,14 +24,39 @@ public class RequestHandler extends Thread {
                 connection.getPort());
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
-            // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
+
+            // TODO 1. index.html 반환하기
+            BufferedReader br = new BufferedReader(new InputStreamReader(in));
+            HashMap<String, String> map = new HashMap<>();
             DataOutputStream dos = new DataOutputStream(out);
-            byte[] body = "Hello World".getBytes();
-            response200Header(dos, body.length);
-            responseBody(dos, body);
+
+            String firstLine = br.readLine();
+            String[] firstTokens = firstLine.split(" ");
+            String method = firstTokens[0];
+            String url = firstTokens[1];
+
+            if (method.equals("GET") && (url.equals("/index.html") || url.equals("/"))) {
+                log.debug("GET /index.html");
+                responseDefaultUrl(dos);
+            }
+            String line;
+            while((line=br.readLine()) != null){
+                String[] tokens = line.split(": ");
+                map.put(tokens[0], tokens[1]);
+                System.out.println(tokens[0]+"   "+tokens[1]);
+            }
         } catch (IOException e) {
             log.error(e.getMessage());
         }
+    }
+
+    private void responseDefaultUrl(DataOutputStream dos) throws IOException {
+        log.debug("GET /index.html");
+//        Path path = new File("./webapp/index.html").toPath();
+        Path path = Paths.get("./webapp/index.html");
+        byte[] body = Files.readAllBytes(path);
+        response200Header(dos, body.length);
+        responseBody(dos, body);
     }
 
     private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {

@@ -35,10 +35,11 @@ public class RequestHandler extends Thread {
             String method = firstTokens[0];
             String url = firstTokens[1];
 
-            if (method.equals("GET") && (url.equals("/index.html") || url.equals("/"))) {
-                log.debug("GET /index.html");
-                responseDefaultUrl(dos);
+            if (url.equals("/")){
+                url = "/index.html";
             }
+            responseUrl(dos, method, url);
+
             String line;
             while((line=br.readLine()) != null){
                 String[] tokens = line.split(": ");
@@ -50,10 +51,9 @@ public class RequestHandler extends Thread {
         }
     }
 
-    private void responseDefaultUrl(DataOutputStream dos) throws IOException {
-        log.debug("GET /index.html");
-//        Path path = new File("./webapp/index.html").toPath();
-        Path path = Paths.get("./webapp/index.html");
+    private void responseUrl(DataOutputStream dos, String method, String url) throws IOException {
+        log.debug(method + " " +url);
+        Path path = Paths.get("./webapp/" + url);
         byte[] body = Files.readAllBytes(path);
         response200Header(dos, body.length);
         responseBody(dos, body);

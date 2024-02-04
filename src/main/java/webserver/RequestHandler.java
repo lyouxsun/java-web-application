@@ -55,15 +55,19 @@ public class RequestHandler extends Thread {
                         pairs.get("name"),
                         pairs.get("email"));
                 repository.addUser(user);
+
+                byte[] body = query.getBytes();
                 log.debug(user.toString());
-                response302Header(dos);
+//                log.debug("1. url = " + url);
+                response200Header(dos, body.length);
+                responseBody(dos, body);
                 return;
             }
 
             if (url.equals("/")){
                 url = "/index.html";
             }
-            System.out.println("2. url = " + url);
+//            log.debug("2. url = " + url);
             response(dos, method, url);
 
 //            String line;

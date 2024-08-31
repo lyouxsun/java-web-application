@@ -37,8 +37,14 @@
 
   `response302Header()`를 통해 response의 상태코드를 302로 설정하고, body에 인자로 받은 url의 html 파일을 넣어 클라이언트에게 전송한다.
 
-### 요구사항 5 - cookie
-*
+### 요구사항 5 - 로그인하기 with cookie
+- [x] request body에서 정보를 읽는 과정이 회원가입 처리와 똑같아서 이 부분은 같이 사용하고, 이후 부분만 메서드를 통해 분리한다.
+
+  http method가 POST인 것은 content length 정보와 body 내용을 읽고, 이후 url 분기문을 통해 `signup()`, `login()`을 분리했다.
+- 아이디와 비밀번호를 사용해서 repository에 저장된 user를 조회 결과에 따라 `addCookieAndRedirect()` 파라미터에 true/false를 넘겨준다.
+- true/false를 response header의 Set-Cookie 필드에 추가한다. 그러면 다음 request 부터는 헤더의 Cookie 필드에 쿠키가 세팅된 것을 확인할 수 있다.
+
+  이 쿠키의 boolean 값으로 로그인 유무를 판단한다.
 
 ### 요구사항 6 - stylesheet 적용
 *

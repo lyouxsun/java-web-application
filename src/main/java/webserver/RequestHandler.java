@@ -49,7 +49,11 @@ public class RequestHandler extends Thread {
             String method = firstTokens[0];
             String url = firstTokens[1];
 
-            if (url.contains("/user/create")) {
+            if (url.equals("/")) {
+                url = "/index.html";
+            }
+
+            if (method.equals("POST")) {
                 System.out.println("method = " + method + ", url = " + url);
                 String line;
                 int bodyLength = 0;
@@ -67,15 +71,16 @@ public class RequestHandler extends Thread {
                 String query = readData(br, bodyLength);
                 System.out.println("query = " + query);
                 Map<String, String> pairs = parseQueryString(query);
-                User user = new User(pairs.get("userId"), pairs.get("password"),
-                        pairs.get("name"), pairs.get("email"));
-                repository.addUser(user);
-                redirect(dos, "/index.html");
-                return;
-            }
 
-            if (url.equals("/")) {
-                url = "/index.html";
+                // TODO 3, 4 - post 방식으로 회원가입 후 redirect 방식으로 이동
+                if (url.equals("/user/create")) {
+                    signup(pairs, dos);
+                }
+
+                // TODO 5. 로그인하기
+                else if (url.equals("/user/login")) {
+                    login(pairs, dos);
+                }
             }
             response(dos, method, url);
         } catch (IOException e) {
@@ -86,6 +91,7 @@ public class RequestHandler extends Thread {
     private void response302Header(DataOutputStream dos) {
         try {
             dos.writeBytes("HTTP/1.1 302 FOUND \r\n");
+            dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
             dos.writeBytes("Location: /index.html");
             dos.writeBytes("\r\n");
         } catch (IOException e) {
@@ -93,23 +99,31 @@ public class RequestHandler extends Thread {
         }
     }
 
-    private void response(DataOutputStream dos, String method, String url) throws IOException {
+    private void response(DataOutputStream dos, String method, String url) {
         log.debug(method + " " + url);
         Path path = new File("./webapp" + url).toPath();
-        byte[] body = Files.readAllBytes(path);
-        if (method.equals("GET")) {
-            response200Header(dos, body.length);
-            responseBody(dos, body);
+        try {
+            byte[] body = Files.readAllBytes(path);
+            if (method.equals("GET")) {
+                response200Header(dos, body.length);
+                responseBody(dos, body);
+            }
+        } catch (IOException e) {
+            log.error(e.getMessage());
         }
     }
 
-    private void redirect(DataOutputStream dos, String url) throws IOException {
-        log.debug("[redirect to " + url + "]");
-        Path path = new File("./webapp" + url).toPath();
-        byte[] body = Files.readAllBytes(path);
-        response302Header(dos);
-        responseBody(dos, body);
-    }
+//    private void redirect(DataOutputStream dos, String url) {
+//        log.debug("[redirect to " + url + "]");
+//        Path path = new File("./webapp" + url).toPath();
+//        try {
+//            byte[] body = Files.readAllBytes(path);
+//            response302Header(dos);
+//            responseBody(dos, body);
+//        } catch (IOException e) {
+//            log.error(e.getMessage());
+//        }
+//    }
 
     private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
         try {
@@ -130,4 +144,36 @@ public class RequestHandler extends Thread {
             log.error(e.getMessage());
         }
     }
+
+    private void signup(Map<String, String> pairs, DataOutputStream dos) {
+        User user = new User(pairs.get("userId"), pairs.get("password"),
+                pairs.get("name"), pairs.get("email"));
+        repository.addUser(user);
+        addCookieAndRedirect(dos, false, "/index.html");
+    }
+
+    private void login(Map<String, String> pairs, DataOutputStream dos) {
+        User user = repository.findUserById(pairs.get("userId"));
+        System.out.println("[login] " + user.toString());
+        if (user != null && user.getPassword().equals(pairs.get("password"))) {
+            addCookieAndRedirect(dos, true, "/index.html");
+        }
+        addCookieAndRedirect(dos, false, "/user/login_failed.html");
+    }
+
+    private void addCookieAndRedirect(DataOutputStream dos, boolean logined, String url) {
+        log.debug("[add login cookie="+logined+" and redirect to " + url + "]");
+        Path path = new File("./webapp" + url).toPath();
+        try {
+            byte[] body = Files.readAllBytes(path);
+            dos.writeBytes("HTTP/1.1 302 FOUND \r\n");
+            dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
+            dos.writeBytes("Location: " + url + " \r\n");
+            dos.writeBytes("Set-Cookie: logined=" + logined + " \r\n");
+            responseBody(dos, body);
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+    }
+
 }

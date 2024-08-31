@@ -15,30 +15,40 @@
     in.read();
 ```
 - 1byte 씩 읽으며 아스키코드값 (int) 을 반환한다.
+- inputStream은 바이트 스트림으로 작동하기 때문에 데이터를 바이트 단위로만 읽을 수 있다. 텍스트 데이터를 읽으려면 바이트를 문자로 변환하는 과정이 필요하다. 
 
-#### 2. InputStreamReader 의 `read()` 메서드 사용하기
-
+  이 때 InputStreamReader를 사용하면 바이트 데이터를 문자 데이터로 변환할 수 있다. 
+  여기에 BufferedReader를 사용해 inputStreamReader를 감싸면 문자 데이터를 라인 단위로 효율적으로 읽을 수 있다.
 ```java
     import java.io.InputStreamReader;
-
-    InputStreamReader reader = new InputStreamReader(in);
-    char[] arr = new char[200];
-    reader.read(arr);
-```
-- InputStreamReader를 생성할 때 파라미터로 InputStream을 넣어야 한다.
-- `read()` 메서드의 파라미터에 char 배열을 넣어주면 읽은 내용을 거기에 써준다.
-- 문제점 : char 배열의 크기만큼만 읽기 때문에 크기를 신경써서 배열을 생성해야 한다.
-
-#### 3. BufferedReader 의 `readLine()` 메서드 사용하기
-
-```java
     import java.io.BufferedReader;
-
+    
     BufferedReader br = new BufferedReader(new InputStreamReader(in));
     String line = br.readLine();
 ```
-- BufferedReader를 생성할 때에는 파라미터로 InputStreamReader를 넣어야 한다.
-- `br.readLine()` 메서드를 통해서 String을 길이 제한 없이 **한 줄씩** 받을 수 있다.
+
+<details>
+  <summary>로그를 통해 inputstream 의 데이터 확인하기</summary>
+        
+    GET /index.html HTTP/1.1
+    Host: localhost:8080
+    Connection: keep-alive
+    Cache-Control: max-age=0
+    sec-ch-ua: "Not)A;Brand";v="99", "Google Chrome";v="127", "Chromium";v="127"
+    sec-ch-ua-mobile: ?0
+    sec-ch-ua-platform: "macOS"
+    Upgrade-Insecure-Requests: 1
+    User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36
+    Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+    Sec-Fetch-Site: none
+    Sec-Fetch-Mode: navigate
+    Sec-Fetch-User: ?1
+    Sec-Fetch-Dest: document
+    Accept-Encoding: gzip, deflate, br, zstd
+    Accept-Language: ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7
+    Cookie: JSESSIONID=27061636078BB70965CFFA4B05465CE6
+
+</details>
 
 ### 파일을 responseBody에 담는 방법
 - 요구사항 1에서는 사용자가 `/index.html` 이나 `/` url을 GET 요청하면 index.html을 응답하였다.
@@ -61,14 +71,4 @@
         - Files 클래스의 메서드들은 Path 객체를 파라미터로 받는다.
 
 ### 주의
-- 데이터를 읽어드릴때 조심해야할 점은 br.readline을 무심코 하면 뒤에 /r/n으로 끝나지 않는다면 서버에서 계속 데이터가 들어오는 것을 기다려 broken pipe 오류가 나는 것을 확인할 수 있다.
-- 즉, /r/n으로 분리되어 있지 않은 body의 내용은 꼭! IOUtils에 있는 것 처럼 contentLength와 함께 넘겨주어 읽어야만 정확히 데이터를 읽어올 수 있다.
-```java
-    public class IOUtils {
-        public static String readData(BufferedReader br, int contentLength) throws IOException {
-            char[] body = new char[contentLength];
-            br.read(body, 0, contentLength);
-            return String.copyValueOf(body);
-        }
-    }
-```
+- 데이터를 읽어드릴때 조심해야할 점은 br.readline을 무심코 하�

@@ -15,7 +15,7 @@
 - [x] Request Header가 어떻게 생겼는지 파악하기 위해 모두 출력해본다.
 - [x] Request Header의 첫번째 줄에서 HTTP method와 요청 url을 구분하여 저장해야 한다.
 - [x] `GET /index.html`  요청을 처리할 메서드를 만든다.
-- [x] css가 적용되지 않는 문제 해결하기
+- [x] css가 적용되지 않는 문제 해결하기 
 
 [요구사항 1 학습 내용](/Requirement_1)
 
@@ -29,11 +29,13 @@
 
 [요구사항 2 학습 내용](/Requirement_2)
 
-### 요구사항 3 - post 방식으로 회원가입
-*
+### 요구사항 3, 4 - post 방식으로 회원가입 후 redirect 방식으로 이동
+- [x] "/user/create" 이 포함된 url은 헤더를 모두 읽으며 Content-Length 정보를 얻고, 이를 통해 body를 읽는 작업을 수행한다.
 
-### 요구사항 4 - redirect 방식으로 이동
-*
+  (request body를 읽을 때에는 기존에 구현되어 있는 IOUtils 클래스의 `readData()` 메서드를 사용한다.)
+- [x] 회원가입 처리를 모두 마친 뒤 홈으로 redirect 처리를 한다. `redirect()`
+
+  `response302Header()`를 통해 response의 상태코드를 302로 설정하고, body에 인자로 받은 url의 html 파일을 넣어 클라이언트에게 전송한다.
 
 ### 요구사항 5 - cookie
 *

@@ -1,19 +1,19 @@
 package webserver;
 
-import java.io.*;
-import java.net.Socket;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
-
 import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import repository.MemoryMemberRepository;
 
+import java.io.*;
+import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+
 import static util.HttpRequestUtils.parseQueryString;
+import static util.IOUtils.readData;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
@@ -23,7 +23,7 @@ public class RequestHandler extends Thread {
 
     public RequestHandler(Socket connectionSocket) {
         this.connection = connectionSocket;
-        repository =  MemoryMemberRepository.getInstance();
+        repository = MemoryMemberRepository.getInstance();
     }
 
     public void run() {
@@ -34,48 +34,50 @@ public class RequestHandler extends Thread {
 
             // TODO 1. index.html 반환하기
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
+//            String line;
+//            while((line = br.readLine())!=null){
+//                log.debug(line);       // 로그를 통해 inputstream 의 데이터 확인하기
+//            }
+
             HashMap<String, String> map = new HashMap<>();
             DataOutputStream dos = new DataOutputStream(out);
-
-            String firstLine = br.readLine();
-            if(firstLine == null){
+            String firstLine = br.readLine();       // ex. GET /index.html HTTP/1.1 이런식으로 들어옴
+            if (firstLine == null) {
                 return;
             }
             String[] firstTokens = firstLine.split(" ");
             String method = firstTokens[0];
             String url = firstTokens[1];
 
-            if(url.contains("/user/create?")){
-                System.out.println("method = " + method);
-                System.out.println("1. url = " + url);
-                String query = url.split("\\?")[1];
+            if (url.contains("/user/create")) {
+                System.out.println("method = " + method + ", url = " + url);
+                String line;
+                int bodyLength = 0;
+                while (true) {
+                    line = br.readLine();
+                    if (line.isEmpty()) {        // 요청 헤더를 다 읽고 while문 빠져나가기
+                        break;
+                    }
+                    System.out.println(line);
+                    if (line.startsWith("Content-Length")) {
+                        String[] strings = line.split(": ");
+                        bodyLength = Integer.parseInt(strings[1]);
+                    }
+                }
+                String query = readData(br, bodyLength);
+                System.out.println("query = " + query);
                 Map<String, String> pairs = parseQueryString(query);
-                User user = new User(pairs.get("userId"),
-                        pairs.get("password"),
-                        pairs.get("name"),
-                        pairs.get("email"));
+                User user = new User(pairs.get("userId"), pairs.get("password"),
+                        pairs.get("name"), pairs.get("email"));
                 repository.addUser(user);
-
-                byte[] body = query.getBytes();
-                log.debug(user.toString());
-//                log.debug("1. url = " + url);
-                response200Header(dos, body.length);
-                responseBody(dos, body);
+                redirect(dos, "/index.html");
                 return;
             }
 
-            if (url.equals("/")){
+            if (url.equals("/")) {
                 url = "/index.html";
             }
-//            log.debug("2. url = " + url);
             response(dos, method, url);
-
-//            String line;
-//            while((line=br.readLine()) != null){
-//                log.debug(line);
-//                String[] tokens = line.split(": ");
-//                map.put(tokens[0], tokens[1]);
-//            }
         } catch (IOException e) {
             log.error(e.getMessage());
         }
@@ -93,9 +95,19 @@ public class RequestHandler extends Thread {
 
     private void response(DataOutputStream dos, String method, String url) throws IOException {
         log.debug(method + " " + url);
-        Path path = Paths.get("./webapp"+url);
+        Path path = new File("./webapp" + url).toPath();
         byte[] body = Files.readAllBytes(path);
-        response200Header(dos, body.length);
+        if (method.equals("GET")) {
+            response200Header(dos, body.length);
+            responseBody(dos, body);
+        }
+    }
+
+    private void redirect(DataOutputStream dos, String url) throws IOException {
+        log.debug("[redirect to " + url + "]");
+        Path path = new File("./webapp" + url).toPath();
+        byte[] body = Files.readAllBytes(path);
+        response302Header(dos);
         responseBody(dos, body);
     }
 

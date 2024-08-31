@@ -26,4 +26,8 @@ public class WebServer {
             Socket connection;
             while ((connection = listenSocket.accept()) != null) {      // 사용자 요청이 있을 경우 RequestHandler 에 위임
                 RequestHandler requestHandler = new RequestHandler(connection);
-    
+                requestHandler.start();         // 요청마다 스레드 실행 -> 멀티스레드 프로그래밍 지원
+            }
+        }
+    }
+}

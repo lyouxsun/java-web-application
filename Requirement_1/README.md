@@ -71,4 +71,14 @@
         - Files 클래스의 메서드들은 Path 객체를 파라미터로 받는다.
 
 ### 주의
-- 데이터를 읽어드릴때 조심해야할 점은 br.readline을 무심코 하�
+- 데이터를 읽어드릴때 조심해야할 점은 br.readline을 무심코 하면 뒤에 /r/n으로 끝나지 않는다면 서버에서 계속 데이터가 들어오는 것을 기다려 broken pipe 오류가 나는 것을 확인할 수 있다.
+- 즉, /r/n으로 분리되어 있지 않은 body의 내용은 꼭! IOUtils에 있는 것 처럼 contentLength와 함께 넘겨주어 읽어야만 정확히 데이터를 읽어올 수 있다.
+```java
+    public class IOUtils {
+        public static String readData(BufferedReader br, int contentLength) throws IOException {
+            char[] body = new char[contentLength];
+            br.read(body, 0, contentLength);
+            return String.copyValueOf(body);
+        }
+    }
+```

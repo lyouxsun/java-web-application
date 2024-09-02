@@ -10,8 +10,10 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import static util.HttpRequestUtils.parseCookies;
 import static util.HttpRequestUtils.parseQueryString;
 import static util.IOUtils.readData;
 
@@ -34,11 +36,6 @@ public class RequestHandler extends Thread {
 
             // TODO 1. index.html 반환하기
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
-//            String line;
-//            while((line = br.readLine())!=null){
-//                log.debug(line);       // 로그를 통해 inputstream 의 데이터 확인하기
-//            }
-
             HashMap<String, String> map = new HashMap<>();
             DataOutputStream dos = new DataOutputStream(out);
             String firstLine = br.readLine();       // ex. GET /index.html HTTP/1.1 이런식으로 들어옴
@@ -82,17 +79,86 @@ public class RequestHandler extends Thread {
                     login(pairs, dos);
                 }
             }
+
+            if (url.equals("/user/list")) {
+                System.out.println("method = " + method + ", url = " + url);
+                String line;
+                Map<String, String> cookies = new HashMap<>();
+                while (true) {
+                    line = br.readLine();
+                    if (line.isEmpty()) {        // 요청 헤더를 다 읽고 while문 빠져나가기
+                        break;
+                    }
+                    System.out.println(line);
+                    if (line.startsWith("Cookie")) {
+                        cookies = parseCookies(line.split(": ")[1]);
+                    }
+                }
+                if (Boolean.parseBoolean(cookies.get("logined"))) {        // 로그인 된 상태
+
+                    System.out.println("cookies.logined = " + Boolean.parseBoolean(cookies.get("logined")));
+                    List<User> users = repository.findAll();
+                    StringBuilder sb = addUserList(users, dos);
+                    byte[] responseBytes = sb.toString().getBytes();
+                    response200Header(dos, responseBytes.length);
+                    dos.write(responseBytes, 0, responseBytes.length);
+                    dos.flush();
+                    return;
+                }
+                System.out.println("로그인 안된 상태!!");
+                redirect(dos, "/user/login.html");          // 로그인 안된 상태
+                return;
+            }
             response(dos, method, url);
         } catch (IOException e) {
             log.error(e.getMessage());
         }
     }
 
+    private StringBuilder addUserList(List<User> users, DataOutputStream dos) {
+        StringBuilder sb = new StringBuilder();
+        int index = 1;
+        sb.append("<div class=\"container\" id=\"main\">\n");
+        sb.append("   <div class=\"col-md-10 col-md-offset-1\">\n");
+        sb.append("      <div class=\"panel panel-default\">\n");
+        sb.append("          <table class=\"table table-hover\">\n");
+        sb.append("              <thead>\n");
+        sb.append("                <tr>\n");
+        sb.append("                    <th>#</th> <th>사용자 아이디</th> <th>이름</th> <th>이메일</th><th></th>\n");
+        sb.append("                </tr>\n");
+        sb.append("              </thead>\n");
+        sb.append("              <tbody>\n");
+        for (User user : users) {
+            sb.append("<tr>");
+            sb.append("<th scope=\"row\">").append(index++).append("</th>");
+            sb.append("<td>").append(user.getUserId()).append("</td>");
+            sb.append("<td>").append(user.getName()).append("</td>");
+            sb.append("<td>").append(user.getEmail()).append("</td>");
+            sb.append("<td><a href=\"#\" class=\"btn btn-success\" role=\"button\">수정</a></td>");
+            sb.append("</tr>");
+        }
+
+        sb.append("              </tbody>\n");
+        sb.append("          </table>\n");
+        sb.append("        </div>\n");
+        sb.append("    </div>\n");
+        sb.append("</div>\n");
+        sb.append("<script src=\"../js/jquery-2.2.0.min.js\"></script>\n");
+        sb.append("<script src=\"../js/bootstrap.min.js\"></script>\n");
+        sb.append("<script src=\"../js/scripts.js\"></script>\n");
+        sb.append("\t</body>\n");
+        sb.append("</html>");
+
+        return sb;
+
+    }
+
+
     private void response302Header(DataOutputStream dos) {
         try {
             dos.writeBytes("HTTP/1.1 302 FOUND \r\n");
             dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
-            dos.writeBytes("Location: /index.html");
+            dos.writeBytes("Location: /index.html\r\n");
             dos.writeBytes("\r\n");
         } catch (IOException e) {
             log.error(e.getMessage());
@@ -113,17 +179,17 @@ public class RequestHandler extends Thread {
         }
     }
 
-//    private void redirect(DataOutputStream dos, String url) {
-//        log.debug("[redirect to " + url + "]");
-//        Path path = new File("./webapp" + url).toPath();
-//        try {
-//            byte[] body = Files.readAllBytes(path);
-//            response302Header(dos);
-//            responseBody(dos, body);
-//        } catch (IOException e) {
-//            log.error(e.getMessage());
-//        }
-//    }
+    private void redirect(DataOutputStream dos, String redirectUrl) {
+        log.debug("[redirect to " + redirectUrl + "]");
+        Path path = new File("./webapp" + redirectUrl).toPath();
+        try {
+            byte[] body = Files.readAllBytes(path);
+            response302Header(dos);
+            responseBody(dos, body);
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+    }
 
     private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
         try {
@@ -162,7 +228,7 @@ public class RequestHandler extends Thread {
     }
 
     private void addCookieAndRedirect(DataOutputStream dos, boolean logined, String url) {
-        log.debug("[add login cookie="+logined+" and redirect to " + url + "]");
+        log.debug("[add login cookie=" + logined + " and redirect to " + url + "]");
         Path path = new File("./webapp" + url).toPath();
         try {
             byte[] body = Files.readAllBytes(path);
@@ -170,6 +236,8 @@ public class RequestHandler extends Thread {
             dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
             dos.writeBytes("Location: " + url + " \r\n");
             dos.writeBytes("Set-Cookie: logined=" + logined + " \r\n");
+            dos.writeBytes("\r\n");
+
             responseBody(dos, body);
         } catch (IOException e) {
             log.error(e.getMessage());

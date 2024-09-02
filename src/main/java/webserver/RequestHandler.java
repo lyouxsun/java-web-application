@@ -50,6 +50,15 @@ public class RequestHandler extends Thread {
                 url = "/index.html";
             }
 
+            if(url.contains("css")){
+//                System.out.println("url = " + url);
+                Path path = new File("./webapp" + url).toPath();        // 요청 url ex) /css/bootstrap.min.css, /css/styles.css
+                byte[] body = Files.readAllBytes(path);
+                responseCssHeader(dos);
+                responseBody(dos, body);
+                return;
+            }
+
             if (method.equals("POST")) {
                 System.out.println("method = " + method + ", url = " + url);
                 String line;
@@ -154,6 +163,7 @@ public class RequestHandler extends Thread {
     }
 
 
+
     private void response302Header(DataOutputStream dos) {
         try {
             dos.writeBytes("HTTP/1.1 302 FOUND \r\n");
@@ -196,6 +206,17 @@ public class RequestHandler extends Thread {
             dos.writeBytes("HTTP/1.1 200 OK \r\n");
             dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
             dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
+            dos.writeBytes("\r\n");
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    // 요청 url에 css가 포함된 경우 됨
+    private void responseCssHeader(DataOutputStream dos){
+        try {
+            dos.writeBytes("HTTP/1.1 200 OK \r\n");
+            dos.writeBytes("Content-Type: text/css;charset=utf-8\r\n");
             dos.writeBytes("\r\n");
         } catch (IOException e) {
             log.error(e.getMessage());

@@ -46,8 +46,15 @@
 
   이 쿠키의 boolean 값으로 로그인 유무를 판단한다.
 
-### 요구사항 6 - stylesheet 적용
-*
+### 요구사항 6 - 사용자 목록 출력하기
+- 쿠키의 login값이 true인 경우에만 사용자 목록을 출력하도록 하고, 회원이 아닌 경우 로그인 페이지로 이동시킨다.
+- java의 string builder를 사용하여 html을 모두 저장한다.
+- sb를 byte array로 변환한 후 data output stream에 `write()` 한 후, `flush()` 하면 화면에 잘 나온다.
 
-### heroku 서버에 배포 후
-*
+  (list.html 파일을 string builder에 모두 저장해야겠지만,, 너무 양이 많아서 user 목록만 보여주도록 변경했다.
+
+  이러한 단점을 보완하기 위해 서블릿, JSP가 나왔다는 것만 상기하자!)
+
+### 요구사항 7 - css 적용하기
+- css의 url을 dos에 적어 response body에 담아줘야 한다!
+- 요청 url의 확장자가 css이거나 요청 헤더가 `Accept: text/css,*/*` 인 경우 -> 응답 헤더를 `Content-Type: text/css`로 해야한다.

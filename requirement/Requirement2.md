@@ -27,7 +27,7 @@
 ```
 
 ### 위의 4번을 처리하며 발생한 트러블 슈팅
-<img src="./user.png">
+<img src="user.png">
 회원 가입을 마치고 아래의 url로 요청을 보내면 
 
 `http://localhost:8080/user/create?userId=id&password=PASSWORD&name=이영선&email=leedrkr323%40naver.com`

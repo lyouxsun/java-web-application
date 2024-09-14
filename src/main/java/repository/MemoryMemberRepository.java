@@ -22,17 +22,17 @@ public class MemoryMemberRepository {
 
     private static Map<String, User> users = Maps.newHashMap();
 
-    public static void addUser(User user) {
+    public void addUser(User user) {
         System.out.println("[회원가입한 회원의 정보] 아이디 = " + user.getUserId() +
                 ", 비밀번호 = " + user.getPassword() + ", 이름 = " + user.getName() + ", 이메일 = " + user.getEmail());
         users.put(user.getUserId(), user);
     }
 
-    public static User findUserById(String userId) {
+    public User findUserById(String userId) {
         return users.get(userId);
     }
 
-    public static List<User> findAll() {
+    public List<User> findAll() {
         return new ArrayList<>(users.values());
     }
 }

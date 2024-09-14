@@ -1,11 +1,13 @@
 import org.junit.Test;
-import webserver.HttpRequest;
+import webserver.httpMessageDto.HttpRequest;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 
 import static org.junit.Assert.assertEquals;
+import static webserver.httpMessageDto.HttpMethod.GET;
+import static webserver.httpMessageDto.HttpMethod.POST;
 
 public class HttpRequestTest {
     private static final String TEST_DIRECTORY = "./src/test/resources/";
@@ -15,7 +17,7 @@ public class HttpRequestTest {
         InputStream in = new FileInputStream(new File(TEST_DIRECTORY + "Http_GET.txt"));
         HttpRequest request = new HttpRequest(in);
 
-        assertEquals("GET", request.getMethod());
+        assertEquals(GET, request.getMethod());
         assertEquals("/user/create", request.getPath());
         assertEquals("keep-alive", request.getHeader("Connection"));
         assertEquals("lyouxsun", request.getParam("userId"));
@@ -27,7 +29,7 @@ public class HttpRequestTest {
         InputStream in = new FileInputStream(new File(TEST_DIRECTORY + "Http_POST.txt"));
         HttpRequest request = new HttpRequest(in);
 
-        assertEquals("POST", request.getMethod());
+        assertEquals(POST, request.getMethod());
         assertEquals("/user/create", request.getPath());
         assertEquals("keep-alive", request.getHeader("Connection"));
         assertEquals("lyouxsun", request.getParam("userId"));

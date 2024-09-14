@@ -2,8 +2,8 @@ package controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import webserver.HttpRequest;
-import webserver.HttpResponse;
+import webserver.httpMessageDto.HttpRequest;
+import webserver.httpMessageDto.HttpResponse;
 import webserver.RequestHandler;
 
 public abstract class AbstractController implements Controller {

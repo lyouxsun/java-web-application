@@ -4,8 +4,8 @@ import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import repository.MemoryMemberRepository;
-import webserver.HttpRequest;
-import webserver.HttpResponse;
+import webserver.httpMessageDto.HttpRequest;
+import webserver.httpMessageDto.HttpResponse;
 import webserver.RequestHandler;
 
 public class LoginController extends AbstractController{

@@ -1,7 +1,7 @@
 package controller;
 
-import webserver.HttpRequest;
-import webserver.HttpResponse;
+import webserver.httpMessageDto.HttpRequest;
+import webserver.httpMessageDto.HttpResponse;
 
 public interface Controller {
     void service(HttpRequest request, HttpResponse response);

@@ -1,5 +1,5 @@
 import org.junit.Test;
-import webserver.HttpResponse;
+import webserver.httpMessageDto.HttpResponse;
 
 import java.io.*;
 import java.nio.file.Files;

@@ -25,7 +25,7 @@ public class HttpResponse {
     }
 
     public void addHeader(String key, String value) {
-        if (header.containsKey(key)) {
+        if (key.equals("Cookies") && header.containsKey(key)) {
             header.replace(key, header.get(key) + ";" + value);
         }
         header.put(key, value);
@@ -38,8 +38,10 @@ public class HttpResponse {
             log.info("[forward] " + path);
             Path filePath = new File("./webapp" + path).toPath();
             byte[] body = Files.readAllBytes(filePath);
-            if (path.contains(".css")) {
-                header.put("Content-Type", "text/css;charset=utf-8");
+            if (path.endsWith(".css")) {
+                header.put("Content-Type", "text/css");
+            } else if (path.endsWith(".js")){
+                header.put("Content-Type", "application/javascript");
             } else {
                 header.put("Content-Type", "text/html;charset=utf-8");
             }
@@ -52,9 +54,25 @@ public class HttpResponse {
         }
     }
 
+    public void sendRedirect(String url) {
+        log.info("[sendRedirect] redirect to " + url);
+        header.put("Content-Type", "text/html;charset=utf-8");
+        header.put("Location", url);
+        try {
+            dos.writeBytes("HTTP/1.1 302 FOUND \r\n");
+            for (String key : header.keySet()) {
+                dos.writeBytes(key + ": " + header.get(key) + "\r\n");
+            }
+            dos.writeBytes("\r\n");
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+    }
+
     private void responseBody(byte[] body) {
         try {
             dos.write(body, 0, body.length);
+            dos.writeBytes("\r\n");
             dos.flush();
         } catch (IOException e) {
             log.error(e.getMessage());
@@ -66,22 +84,6 @@ public class HttpResponse {
     private void response200Header() {
         try {
             dos.writeBytes("HTTP/1.1 200 OK \r\n");
-            for (String key : header.keySet()) {
-                dos.writeBytes(key + ": " + header.get(key) + "\r\n");
-            }
-            dos.writeBytes("\r\n");
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-    }
-
-
-    public void sendRedirect(String path) {
-        log.info("[sendRedirect] redirect to " + path);
-        header.put("Content-Type", "text/html;charset=utf-8");
-        header.put("Location", path);
-        try {
-            dos.writeBytes("HTTP/1.1 302 FOUND \r\n");
             for (String key : header.keySet()) {
                 dos.writeBytes(key + ": " + header.get(key) + "\r\n");
             }

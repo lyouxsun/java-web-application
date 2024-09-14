@@ -17,7 +17,7 @@ public class LoginController extends AbstractController{
     }
 
     @Override
-    void doPost(HttpRequest request, HttpResponse response) {
+    public void doPost(HttpRequest request, HttpResponse response) {
         log.info("[LoginController] service");
         User user = repository.findUserById(request.getParam("userId"));
         if (user != null && user.getPassword().equals(request.getParam("password"))) {
@@ -27,10 +27,5 @@ public class LoginController extends AbstractController{
         }
         response.addHeader("Cookie", "logined=false");
         response.sendRedirect("/user/login_failed.html");
-    }
-
-    @Override
-    void doGet(HttpRequest request, HttpResponse response) {
-
     }
 }

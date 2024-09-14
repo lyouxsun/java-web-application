@@ -1,6 +1,6 @@
 package webserver;
 
-import controller.*;
+import controller.Controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import webserver.httpMessageDto.HttpRequest;
@@ -10,25 +10,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private final Socket connection;
-    private final Map<String, Controller> controllers = new HashMap<>();
     private HttpRequest request;
     private HttpResponse response;
 
     public RequestHandler(Socket connectionSocket) {
         this.connection = connectionSocket;
-
-        controllers.put("/index.html", new HomeController());
-        controllers.put("/user/login", new LoginController());
-        controllers.put("/user/create", new SignupController());
-        controllers.put("/user/list", new UserListController());
-
     }
 
     public void run() {
@@ -39,12 +30,12 @@ public class RequestHandler extends Thread {
             response = new HttpResponse(out);
 
             String path = request.getPath();
-            Controller controller = controllers.get(path);
+            Controller controller = RequestMapping.getController(path);
 
-            if(controller == null) {
-                path = getDefaultPath(path);
+            if (controller == null) {
+                path = request.getPath();
                 response.forward(path);
-            } else{
+            } else {
                 controller.service(request, response);
             }
 
@@ -53,11 +44,5 @@ public class RequestHandler extends Thread {
         }
     }
 
-    private String getDefaultPath(String path) {
-        if (path.equals("/")) {
-            return request.setPath("/index.html");
-        }
-        return path;
-    }
 
 }

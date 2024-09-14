@@ -83,6 +83,9 @@ public class HttpRequest {
     }
 
     public String getPath() {
+        if (requestLine.getPath().equals("/")) {
+            return requestLine.setPath("/index.html");
+        }
         return requestLine.getPath();
     }
 

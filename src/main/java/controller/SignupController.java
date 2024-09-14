@@ -18,7 +18,7 @@ public class SignupController extends AbstractController{
     }
 
     @Override
-    void doPost(HttpRequest request, HttpResponse response) {
+    public void doPost(HttpRequest request, HttpResponse response) {
         log.info("[SignupController] service");
         User user = new User(request.getParam("userId"), request.getParam("password"),
                 request.getParam("name"), request.getParam("email"));
@@ -27,8 +27,4 @@ public class SignupController extends AbstractController{
         response.sendRedirect("/index.html");
     }
 
-    @Override
-    void doGet(HttpRequest request, HttpResponse response) {
-
-    }
 }

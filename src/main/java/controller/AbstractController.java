@@ -6,20 +6,23 @@ import webserver.httpMessageDto.HttpRequest;
 import webserver.httpMessageDto.HttpResponse;
 import webserver.RequestHandler;
 
+import static webserver.httpMessageDto.HttpMethod.GET;
+import static webserver.httpMessageDto.HttpMethod.POST;
+
 public abstract class AbstractController implements Controller {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     @Override
     public void service(HttpRequest request, HttpResponse response) {
         log.info("[" + this.getClass().getSimpleName() + "] service");
-        if (request.getMethod().equals("GET")) {
+        if (request.getMethod() == GET) {
             doGet(request, response);
-        } else if (request.getMethod().equals("POST")) {
+        } else if (request.getMethod() == POST) {
             doPost(request, response);
         }
     }
 
-    abstract void doPost(HttpRequest request, HttpResponse response);
+    protected void doPost(HttpRequest request, HttpResponse response){}
 
-    abstract void doGet(HttpRequest request, HttpResponse response);
+    protected void doGet(HttpRequest request, HttpResponse response){}
 }

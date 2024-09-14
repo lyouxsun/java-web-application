@@ -21,7 +21,7 @@ public class UserListController extends AbstractController {
 
 
     @Override
-    void doGet(HttpRequest request, HttpResponse response) {
+    public void doGet(HttpRequest request, HttpResponse response) {
         log.info("[UserListController] service");
         boolean logined = request.isLogin();
 
@@ -34,10 +34,5 @@ public class UserListController extends AbstractController {
         log.info("cookies의 logined 값 = false");
         response.addHeader("Cookie", "logined=false");
         response.sendRedirect("/user/login.html");          // 로그인 안된 상태
-    }
-
-    @Override
-    void doPost(HttpRequest request, HttpResponse response) {
-
     }
 }

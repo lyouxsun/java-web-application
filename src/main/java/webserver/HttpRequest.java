@@ -21,9 +21,9 @@ public class HttpRequest {
     private final Map<String, String> headers = new HashMap<>();
     private Map<String, String> params = new HashMap<>();
     private String body;           // GET은 body가 없을 수도 있으니 final (X)
-    private final String method;
+    private String path;
     private final String url;
-    private final String path;
+    private final String method;
 
     public HttpRequest(InputStream inputStream) throws IOException {
 
@@ -81,6 +81,12 @@ public class HttpRequest {
         return url;
     }
 
+    public String setPath(String path) {
+        log.info("[setUrl] " + path);
+        this.path = path;
+        return path;
+    }
+
     public String getPath() {
         log.info("[getPath] " + path);
         return path;
@@ -99,4 +105,5 @@ public class HttpRequest {
         Map<String, String> cookies = parseCookies(cookieValue);
         return Boolean.parseBoolean(cookies.get("logined"));        // 파라미터의 문자열이 null -> false 반환
     }
+
 }

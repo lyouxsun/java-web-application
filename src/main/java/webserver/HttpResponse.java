@@ -30,17 +30,21 @@ public class HttpResponse {
         header.put(key, value);
     }
 
-    // GET 요청 시 응답 데이터 처리 메서드
-    public void forward(String url) {
-        try {
-            Path path = new File("./webapp" + url).toPath();
-            byte[] body = Files.readAllBytes(path);
 
-            header.put("Content", "text/html;charset=utf-8");
-            header.put("Content-Type", "text/html;charset=utf-8");
+    // GET 요청 시 응답 데이터 처리 메서드
+    public void forward(String path) {
+        try {
+            log.info("[forward] " + path);
+            Path filePath = new File("./webapp" + path).toPath();
+            byte[] body = Files.readAllBytes(filePath);
+            if (path.contains(".css")) {
+                header.put("Content-Type", "text/css;charset=utf-8");
+            } else {
+                header.put("Content-Type", "text/html;charset=utf-8");
+            }
             header.put("Content-Length", String.valueOf(body.length));
 
-            responseHeader(200);
+            response200Header();
             responseBody(body);
         } catch (IOException e) {
             log.error(e.getMessage());
@@ -58,9 +62,9 @@ public class HttpResponse {
 
 
     // 응답 헤더 처리 메서드 (redirect, 200, 302)
-    private void responseHeader(int statusCode) {
+    private void response200Header() {
         try {
-            dos.writeBytes("HTTP/1.1 " + statusCode + " OK \r\n");
+            dos.writeBytes("HTTP/1.1 200 OK \r\n");
             for (String key : header.keySet()) {
                 dos.writeBytes(key + ": " + header.get(key) + "\r\n");
             }
@@ -72,7 +76,7 @@ public class HttpResponse {
 
 
     public void sendRedirect(String path) {
-        log.debug("[sendRedirect] redirect to " + path);
+        log.info("[sendRedirect] redirect to " + path);
         header.put("Content-Type", "text/html;charset=utf-8");
         header.put("Location", path);
         try {
@@ -81,32 +85,6 @@ public class HttpResponse {
                 dos.writeBytes(key + ": " + header.get(key) + "\r\n");
             }
             dos.writeBytes("\r\n");
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-    }
-
-    // 요청 url에 css가 포함된 경우 됨
-    private void responseCssHeader(int statusCode) {
-        try {
-            dos.writeBytes("HTTP/1.1 " + statusCode + " OK \r\n");
-            for (String key : header.keySet()) {
-                dos.writeBytes(key + ": " + header.get(key) + "\r\n");
-            }
-            dos.writeBytes("\r\n");
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-    }
-
-    public void css(String path) {
-        try {
-            Path filePath = new File("./webapp" + path).toPath();        // 요청 url ex) /css/bootstrap.min.css, /css/styles.css
-            byte[] body = Files.readAllBytes(filePath);
-            header.put("Content-Type", "text/css;charset=utf-8");
-            header.put("Content-Length", String.valueOf(body.length));
-            responseCssHeader(200);
-            responseBody(body);
         } catch (IOException e) {
             log.error(e.getMessage());
         }
@@ -148,7 +126,7 @@ public class HttpResponse {
         byte[] bytes = sb.toString().getBytes();
 
         header.put("Content-Length", String.valueOf(bytes.length));
-        responseHeader(200);
+        response200Header();
         responseBody(bytes);
     }
 }

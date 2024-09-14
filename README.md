@@ -93,5 +93,21 @@
   => http 메시지에서 header와 body를 구분하는 공백 줄 `"\r\n"`은 `trim().isEmpty()`를 통해 검증해야 한다.
 - response header에 key:value를 추가하는 역할과 header의 값을 outputStream에 적는 역할을 구분하여 메서드를 구현한다.
   `addHeader()`, `responseHeader()`
-  
-  redirect 할 때, sendRedirect() 메서드에 로그인 여부와 url을 파라미터로 넘기는 것이 아니라, `response.addHeader()`를 통해 쿠키를 추가한 후 `response.sendRedirect()` 수행
+
+   => redirect 할 때, sendRedirect() 메서드에 로그인 여부와 url을 파라미터로 넘기는 것이 아니라, `response.addHeader()`를 통해 쿠키를 추가한 후 `response.sendRedirect()` 수행
+
+### 요구사항 3 - 다형성을 활용해 클라이언트 요청 URL에 대한 분기 처리를 제거한다.
+- 기존 RequestHandler 클래스에서는 기능이 추가될 때마다 url별 분기문이 하나씩 추가되는 방식으로 구현되어 있다.
+- 자바의 다형성을 활용해 분기문을 제거하기!
+
+  **다형성이 사용된 부분 : 한 타입의 참조변수를 통해 여러 타입의 객체를 참조할 수 있도록 만들었다. 상위 클래스 타입의 참조변수`Controller 인터페이스`로 하위 클래스 `--Controller 클래스`의 객체를 참조했다.
+
+```java
+  Controller controller = controllers.get(path);
+  controller.service(request, response);
+```
+
+![class diagram](/requirement/class_diagram1.jpg)
+- Controller 인터페이스를 만든다.
+- Controller 인터페이스를 구현하는 AbstractController 추상클래스를 만든다. 이 추상클래스의 `service()` 메서드에서는 http method에 따라 다른 메서드를 실행하도록 분기문을 추가한다. (Controller 간의 중복을 최소화하기 위해 중복되는 로직을 추상클래스에 구현한다.) Controller 클래스들은 해당 추상클래스의 구현체이다.
+- 각 `method + path`마다 처리해야하는 기능을 Controller 클래스의 `doGet()` 또는 `doPost()` 메서드에 구현

@@ -88,6 +88,10 @@
     - 변수 자체가 메모리에 값으로 존재하지 않는 상태
 
 ### 요구사항 2 - 응답 데이터를 처리하는 로직을 별도의 클래스로 분리한다. (HttpResponse)
-* 응답을 보낼 때 HTML, CSS, 자바스크립트 파일을 직접 읽어 응답을 보내는 메서드는 `forward()`, 다른 URL로 리다이렉ㄱ트하는 메서드는 `sendRedirect()` 로 나누어 구현한다.
+* 응답을 보낼 때 HTML, CSS, 자바스크립트 파일을 직접 읽어 응답을 보내는 메서드는 `forward()`, 다른 URL로 리다이렉트하는 메서드는 `sendRedirect()` 로 나누어 구현한다.
   
   => http 메시지에서 header와 body를 구분하는 공백 줄 `"\r\n"`은 `trim().isEmpty()`를 통해 검증해야 한다.
+- response header에 key:value를 추가하는 역할과 header의 값을 outputStream에 적는 역할을 구분하여 메서드를 구현한다.
+  `addHeader()`, `responseHeader()`
+  
+  redirect 할 때, sendRedirect() 메서드에 로그인 여부와 url을 파라미터로 넘기는 것이 아니라, `response.addHeader()`를 통해 쿠키를 추가한 후 `response.sendRedirect()` 수행

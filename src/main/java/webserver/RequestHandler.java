@@ -33,7 +33,10 @@ public class RequestHandler extends Thread {
 
             String url = request.getUrl();
             String method = request.getMethod();
-
+            log.info("url = " + url);
+            if (url.equals("/")){
+                url = "/index.html";
+            }
 
             if (url.contains(".css")) {
                 response.css(request.getPath());        // TODO 7. CSS 적용하기

@@ -28,7 +28,7 @@
 - [x] User 객체에 데이터 저장한 후에 / 화면으로 돌아오도록 url 바꿔주기
   → 계속 오류가 나서 200이 아니라 302 status code로 처리해줌
 
-[요구사항 2 학습 내용]((/requirement/Requirement2.md)
+[요구사항 2 학습 내용](/requirement/Requirement2.md)
 
 ### 요구사항 3, 4 - post 방식으로 회원가입 후 redirect 방식으로 이동
 - [x] "/user/create" 이 포함된 url은 헤더를 모두 읽으며 Content-Length 정보를 얻고, 이를 통해 body를 읽는 작업을 수행한다.
